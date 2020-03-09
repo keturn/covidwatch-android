@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">contact-tracing</string>
+    <string name="contact_logs">CONTACT LOGS</string>
+    <string name="i_feel_sick">I FEEL SICK</string>
+</resources>
