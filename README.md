@@ -1,2 +1,2 @@
-# covid-19-riskre-android
+# COVID19 Risk
 Android protoype for www.covid19risk.com
