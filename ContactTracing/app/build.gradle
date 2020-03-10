@@ -22,4 +22,6 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.0.0'
     //implementation project(':android-beacon-library:lib')
     implementation 'org.altbeacon:android-beacon-library:2+'
+    implementation 'com.android.support:recyclerview-v7:2+'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
 }
