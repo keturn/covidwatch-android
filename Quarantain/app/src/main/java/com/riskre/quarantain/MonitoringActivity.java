@@ -201,7 +201,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
                     Integer time_of_contact = sharedPref.getInt(beacon.getId1().toString(), 1);
 
                     contact_logs.add("Distance: " + beacon.getDistance() + "\n" +
-                            "UUID: " + beacon.getId1() + "\n" +
+                            "Human ID: " + beacon.getId1() + "\n" +
                             "Seconds of Contact: " + time_of_contact.toString() + "\n");
 
                     ed.putInt(beacon.getId1().toString(), time_of_contact.intValue() + 1);
