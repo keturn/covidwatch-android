@@ -48,15 +48,14 @@ public class QuarantainApplication extends Application implements BootstrapNotif
                 setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
 
         // create a new beacon to transmit
-        beacon = new Beacon.Builder()
+         beacon = new Beacon.Builder()
                 .setId1("2f234454-cf6d-4a0f-adf2-f4911ba9ffa6")
-                .setId2("1") // TODO more data
-                .setId3("2") // TODO more data
-                .setManufacturer(0x0118)
+                .setId2("1")
+                .setId3("2")
+                .setManufacturer(0x004C) // Radius Networks.  Change this for other beacon layouts
                 .setTxPower(-59)
-                .setDataFields(Arrays.asList(new Long[] {0l})) // TODO beacon data
+                .setDataFields(Arrays.asList(new Long[] {0l})) // Remove this for beacon layouts without d: fields
                 .build();
-
         // TODO some phones can do bluetooth LE scan but not transmit
         // need to check for that case here at some point
         BeaconParser beaconParser = new BeaconParser()
@@ -86,7 +85,7 @@ public class QuarantainApplication extends Application implements BootstrapNotif
 
         Notification.Builder builder = new Notification.Builder(this);
         builder.setSmallIcon(R.mipmap.ic_launcher);
-        builder.setContentTitle("Quarantain: passively logging");
+        builder.setContentTitle("passively logging human contact");
         Intent intent = new Intent(this, MonitoringActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT

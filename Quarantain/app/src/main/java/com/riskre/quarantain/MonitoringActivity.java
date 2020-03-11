@@ -1,54 +1,61 @@
 package com.riskre.quarantain;
 
 import android.Manifest;
+import android.accessibilityservice.FingerprintGestureController;
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.riskre.quarantain.QuarantainApplication;
-import com.riskre.quarantain.R;
-
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
+import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.UUID;
 
-/**
- *
- * @author dyoung
- * @author Matt Tyler
- */
 public class MonitoringActivity extends AppCompatActivity implements BeaconConsumer{
+
     protected static final String TAG = "MonitoringActivity";
     private static final int PERMISSION_REQUEST_FINE_LOCATION = 1;
     private static final int PERMISSION_REQUEST_BACKGROUND_LOCATION = 2;
+
     private BeaconManager beaconManager = BeaconManager.getInstanceForApplication(this);
-    private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager layoutManager;
+    private Integer uniqueDevices = new Integer(0);
+
+    // we use a map to store the uuid w/ the index of the contact_log
+    // to quickly set an index of an array list
+    // this is not so ideal and should be fixed when cleaning this up
+    // we also store a count for each UUID
+    HashMap<String, Integer> UUID_map = new HashMap<String, Integer>();
+    HashMap<String, Integer> UUID_count = new HashMap<String, Integer>();
+    private ArrayList<String> contact_logs = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate");
+            Log.d(TAG, "onCreate");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_monitoring);
-        verifyBluetooth();
 
+        verifyBluetooth();
+        initRecyclerView();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
@@ -60,6 +67,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
                             builder.setTitle("This app needs background location access");
                             builder.setMessage("Please grant location access so this app can detect beacons in the background.");
                             builder.setPositiveButton(android.R.string.ok, null);
+
                             builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
 
                                 @TargetApi(23)
@@ -70,6 +78,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
                                 }
 
                             });
+
                             builder.show();
                         }
                         else {
@@ -108,9 +117,15 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
                     });
                     builder.show();
                 }
-
             }
         }
+    }
+
+    private void initRecyclerView(){
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        mAdapter = new ContactLogsAdapter(contact_logs, this);
+        recyclerView.setAdapter(mAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     @Override
@@ -125,13 +140,13 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
                     builder.setTitle("Functionality limited");
                     builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons.");
                     builder.setPositiveButton(android.R.string.ok, null);
-                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
 
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                         @Override
                         public void onDismiss(DialogInterface dialog) {
                         }
-
                     });
+
                     builder.show();
                 }
                 return;
@@ -144,11 +159,13 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
                     builder.setTitle("Functionality limited");
                     builder.setMessage("Since background location access has not been granted, this app will not be able to discover beacons when in the background.");
                     builder.setPositiveButton(android.R.string.ok, null);
+
                     builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                         @Override
                         public void onDismiss(DialogInterface dialog) {
                         }
                     });
+
                     builder.show();
                 }
                 return;
@@ -176,20 +193,28 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
         RangeNotifier rangeNotifier = new RangeNotifier() {
             @Override
             public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
-                if (beacons.size() > 0) {
-                    Log.i(TAG, "didRangeBeaconsInRegion called with beacon count:  "+beacons.size());
+                contact_logs.clear();
+                for (Beacon beacon : beacons){
 
-                    Beacon firstBeacon = beacons.iterator().next();
-                    Log.i(TAG, firstBeacon.toString());
-                    Log.i(TAG, ""+firstBeacon.getDistance());
+                    SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor ed = sharedPref.edit();
+
+                    Integer time_of_contact = sharedPref.getInt(beacon.getId1().toString(),1);
+
+                    contact_logs.add("Distance: "+beacon.getDistance()+"\n"+
+                                     "UUID: "+beacon.getId1()+"\n"+
+                                     "Seconds of Contact: "+time_of_contact.toString()+"\n");
+
+                    ed.putInt(beacon.getId1().toString(), time_of_contact.intValue()+1);
+                    ed.apply();
                 }
+                mAdapter.notifyDataSetChanged();
             }
-
         };
         try {
             beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
             beaconManager.addRangeNotifier(rangeNotifier);
-        } catch (RemoteException e) {   }
+        } catch (RemoteException e) { }
     }
 
     @Override
