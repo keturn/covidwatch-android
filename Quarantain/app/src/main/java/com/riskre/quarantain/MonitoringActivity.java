@@ -45,8 +45,6 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
     // to quickly set an index of an array list
     // this is not so ideal and should be fixed when cleaning this up
     // we also store a count for each UUID
-    HashMap<String, Integer> UUID_map = new HashMap<String, Integer>();
-    HashMap<String, Integer> UUID_count = new HashMap<String, Integer>();
     private ArrayList<String> contact_logs = new ArrayList<String>();
 
     @Override
@@ -177,12 +175,14 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
         QuarantainApplication application = ((QuarantainApplication) this.getApplicationContext());
         if (BeaconManager.getInstanceForApplication(this).getMonitoredRegions().size() > 0) {
             Log.i(TAG, "Disabled monitoring!");
-            application.disableMonitoring();
+            beaconManager.unbind(this);
             beaconManager.removeAllMonitorNotifiers();
+            application.disableMonitoring();
             ((Button) findViewById(R.id.enableButton)).setText("Re-Enable Human-Contact logging");
         } else {
             Log.i(TAG, "Enabled monitoring!");
             ((Button) findViewById(R.id.enableButton)).setText("Disable Human-Contact logging");
+            beaconManager.bind(this);
             application.enableMonitoring();
         }
     }
@@ -218,7 +218,6 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
         } catch (RemoteException e) {
             // TODO
         }
-
     }
 
     @Override

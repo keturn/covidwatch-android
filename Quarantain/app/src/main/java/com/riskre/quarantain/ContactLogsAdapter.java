@@ -43,7 +43,6 @@ public class ContactLogsAdapter extends RecyclerView.Adapter<ContactLogsAdapter.
         return contact_logs.size();
     }
 
-
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView data;

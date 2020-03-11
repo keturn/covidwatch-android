@@ -35,8 +35,10 @@ public class QuarantainApplication extends Application implements BootstrapNotif
     private BeaconManager beaconManager;
     private Region region;
     private Beacon beacon;
+    private Notification.Builder builder;
 
     public void onCreate() {
+
         super.onCreate();
 
         beaconManager = BeaconManager.getInstanceForApplication(this);
@@ -56,6 +58,7 @@ public class QuarantainApplication extends Application implements BootstrapNotif
                 .setTxPower(-59)
                 .setDataFields(Arrays.asList(new Long[]{0l})) // Remove this for beacon layouts without d: fields
                 .build();
+
         // TODO some phones can do bluetooth LE scan but not transmit
         // need to check for that case here at some point
         BeaconParser beaconParser = new BeaconParser()
@@ -83,7 +86,7 @@ public class QuarantainApplication extends Application implements BootstrapNotif
                 null, null, null);
         regionBootstrap = new RegionBootstrap(this, region);
 
-        Notification.Builder builder = new Notification.Builder(this);
+        builder = new Notification.Builder(this);
         builder.setSmallIcon(R.mipmap.ic_launcher);
         builder.setContentTitle("passively logging human contact");
         Intent intent = new Intent(this, MonitoringActivity.class);
@@ -91,7 +94,7 @@ public class QuarantainApplication extends Application implements BootstrapNotif
                 this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
         );
         builder.setContentIntent(pendingIntent);
-        beaconManager.enableForegroundServiceScanning(builder.build(), 456);
+        beaconManager.enableForegroundServiceScanning(builder.build(), 100);
 
         // For the above foreground scanning service to be useful, we disable
         // JobScheduler-based scans and set a fast background scan
@@ -107,16 +110,8 @@ public class QuarantainApplication extends Application implements BootstrapNotif
     }
 
     public void disableMonitoring() {
+
         if (regionBootstrap != null) {
-            try {
-                beaconManager.stopRangingBeaconsInRegion(region);
-                beaconManager.removeAllRangeNotifiers();
-                beaconManager.removeAllMonitorNotifiers();
-                beaconManager.stopMonitoringBeaconsInRegion(region);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-                // TODO proper handling
-            }
             regionBootstrap.disable();
             regionBootstrap = null;
         }
