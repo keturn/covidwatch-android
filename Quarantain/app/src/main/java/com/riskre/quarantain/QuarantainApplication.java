@@ -12,6 +12,7 @@ import android.content.Intent;
 
 import android.os.Build;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.util.Log;
 
 import org.altbeacon.beacon.Beacon;
@@ -36,6 +37,7 @@ public class QuarantainApplication extends Application implements BootstrapNotif
     private Region region;
     private Beacon beacon;
     private Notification.Builder builder;
+    private String android_id;
 
     public void onCreate() {
 
@@ -48,10 +50,12 @@ public class QuarantainApplication extends Application implements BootstrapNotif
         beaconManager.getBeaconParsers().clear();
         beaconManager.getBeaconParsers().add(new BeaconParser().
                 setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
+        android_id = Settings.Secure.getString(this.getContentResolver(),
+                Settings.Secure.ANDROID_ID);
 
         // create a new beacon to transmit
         beacon = new Beacon.Builder()
-                .setId1("2f234454-cf6d-4a0f-adf2-f4911ba9ffa6")
+                .setId1(android_id)
                 .setId2("1")
                 .setId3("2")
                 .setManufacturer(0x004C) // Radius Networks.  Change this for other beacon layouts
@@ -115,6 +119,10 @@ public class QuarantainApplication extends Application implements BootstrapNotif
             regionBootstrap.disable();
             regionBootstrap = null;
         }
+    }
+
+    public String getAndroidId(){
+        return android_id;
     }
 
     public void enableMonitoring() {

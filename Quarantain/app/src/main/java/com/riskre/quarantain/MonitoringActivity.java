@@ -11,9 +11,11 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -39,7 +41,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 
     private BeaconManager beaconManager = BeaconManager.getInstanceForApplication(this);
     private RecyclerView.Adapter mAdapter;
-    private Integer uniqueDevices = new Integer(0);
+
 
     // we use a map to store the uuid w/ the index of the contact_log
     // to quickly set an index of an array list
@@ -117,6 +119,9 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
                 }
             }
         }
+        QuarantainApplication application = ((QuarantainApplication) this.getApplicationContext());
+        TextView android_id_view = findViewById(R.id.android_id);
+        android_id_view.setText("Your ID: "+application.getAndroidId());
     }
 
     private void initRecyclerView() {
@@ -189,6 +194,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 
     @Override
     public void onBeaconServiceConnect() {
+
         RangeNotifier rangeNotifier = new RangeNotifier() {
             @Override
             public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
@@ -201,6 +207,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
                     Integer time_of_contact = sharedPref.getInt(beacon.getId1().toString(), 1);
 
                     contact_logs.add("Distance: " + beacon.getDistance() + "\n" +
+
                             "Human ID: " + beacon.getId1() + "\n" +
                             "Seconds of Contact: " + time_of_contact.toString() + "\n");
 
