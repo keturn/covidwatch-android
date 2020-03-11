@@ -39,7 +39,7 @@ public class QuarantainApplication extends Application implements BootstrapNotif
     public void onCreate() {
         super.onCreate();
 
-        beaconManager =  BeaconManager.getInstanceForApplication(this);
+        beaconManager = BeaconManager.getInstanceForApplication(this);
 
         // By default the AndroidBeaconLibrary will only find AltBeacons. We configure the beaconManager
         // to detect iBeacons which is what iPhones use for cross compatibility.
@@ -48,13 +48,13 @@ public class QuarantainApplication extends Application implements BootstrapNotif
                 setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
 
         // create a new beacon to transmit
-         beacon = new Beacon.Builder()
+        beacon = new Beacon.Builder()
                 .setId1("2f234454-cf6d-4a0f-adf2-f4911ba9ffa6")
                 .setId2("1")
                 .setId3("2")
                 .setManufacturer(0x004C) // Radius Networks.  Change this for other beacon layouts
                 .setTxPower(-59)
-                .setDataFields(Arrays.asList(new Long[] {0l})) // Remove this for beacon layouts without d: fields
+                .setDataFields(Arrays.asList(new Long[]{0l})) // Remove this for beacon layouts without d: fields
                 .build();
         // TODO some phones can do bluetooth LE scan but not transmit
         // need to check for that case here at some point
@@ -65,7 +65,7 @@ public class QuarantainApplication extends Application implements BootstrapNotif
             @Override
             public void onStartFailure(int errorCode) {
                 // TODO error handling
-                Log.i(TAG, "Advertisement start failed with code: "+errorCode);
+                Log.i(TAG, "Advertisement start failed with code: " + errorCode);
             }
 
             @Override
@@ -121,6 +121,7 @@ public class QuarantainApplication extends Application implements BootstrapNotif
             regionBootstrap = null;
         }
     }
+
     public void enableMonitoring() {
         Region region = new Region("backgroundRegion",
                 null, null, null);

@@ -14,9 +14,11 @@ import android.content.DialogInterface;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
@@ -29,7 +31,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class MonitoringActivity extends AppCompatActivity implements BeaconConsumer{
+public class MonitoringActivity extends AppCompatActivity implements BeaconConsumer {
 
     protected static final String TAG = "MonitoringActivity";
     private static final int PERMISSION_REQUEST_FINE_LOCATION = 1;
@@ -49,7 +51,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-            Log.d(TAG, "onCreate");
+        Log.d(TAG, "onCreate");
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_monitoring);
@@ -80,8 +82,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
                             });
 
                             builder.show();
-                        }
-                        else {
+                        } else {
                             final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                             builder.setTitle("Functionality limited");
                             builder.setMessage("Since background location access has not been granted, this app will not be able to discover beacons in the background.  Please go to Settings -> Applications -> Permissions and grant background location access to this app.");
@@ -102,8 +103,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
                     requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
                                     Manifest.permission.ACCESS_BACKGROUND_LOCATION},
                             PERMISSION_REQUEST_FINE_LOCATION);
-                }
-                else {
+                } else {
                     final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle("Functionality limited");
                     builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons.  Please go to Settings -> Applications -> Permissions and grant location access to this app.");
@@ -121,7 +121,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
         }
     }
 
-    private void initRecyclerView(){
+    private void initRecyclerView() {
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         mAdapter = new ContactLogsAdapter(contact_logs, this);
         recyclerView.setAdapter(mAdapter);
@@ -179,11 +179,10 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
             Log.i(TAG, "Disabled monitoring!");
             application.disableMonitoring();
             beaconManager.removeAllMonitorNotifiers();
-            ((Button)findViewById(R.id.enableButton)).setText("Re-Enable Human-Contact logging");
-        }
-        else {
+            ((Button) findViewById(R.id.enableButton)).setText("Re-Enable Human-Contact logging");
+        } else {
             Log.i(TAG, "Enabled monitoring!");
-            ((Button)findViewById(R.id.enableButton)).setText("Disable Human-Contact logging");
+            ((Button) findViewById(R.id.enableButton)).setText("Disable Human-Contact logging");
             application.enableMonitoring();
         }
     }
@@ -194,27 +193,32 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
             @Override
             public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
                 contact_logs.clear();
-                for (Beacon beacon : beacons){
+                for (Beacon beacon : beacons) {
 
                     SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
                     SharedPreferences.Editor ed = sharedPref.edit();
 
-                    Integer time_of_contact = sharedPref.getInt(beacon.getId1().toString(),1);
+                    Integer time_of_contact = sharedPref.getInt(beacon.getId1().toString(), 1);
 
-                    contact_logs.add("Distance: "+beacon.getDistance()+"\n"+
-                                     "UUID: "+beacon.getId1()+"\n"+
-                                     "Seconds of Contact: "+time_of_contact.toString()+"\n");
+                    contact_logs.add("Distance: " + beacon.getDistance() + "\n" +
+                            "UUID: " + beacon.getId1() + "\n" +
+                            "Seconds of Contact: " + time_of_contact.toString() + "\n");
 
-                    ed.putInt(beacon.getId1().toString(), time_of_contact.intValue()+1);
-                    ed.apply();
+                    ed.putInt(beacon.getId1().toString(), time_of_contact.intValue() + 1);
+                    ed.commit();
                 }
                 mAdapter.notifyDataSetChanged();
             }
         };
+
         try {
+            beaconManager.removeAllRangeNotifiers();
             beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
             beaconManager.addRangeNotifier(rangeNotifier);
-        } catch (RemoteException e) { }
+        } catch (RemoteException e) {
+            // TODO
+        }
+
     }
 
     @Override
@@ -247,8 +251,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
                 });
                 builder.show();
             }
-        }
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             final AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Bluetooth LE not available");
             builder.setMessage("Sorry, this device does not support Bluetooth LE.");
