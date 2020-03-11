@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Quarantain</string>
+    <string name="start">START</string>
+    <string name="disable_human_contact_logging">DISABLE HUMAN-CONTACT LOGGING</string>
 </resources>
