@@ -33,8 +33,6 @@
                 android:name="longScanForcingEnabled"
                 android:value="true" />
         </service>
-
-
     </application>
 
 </manifest>

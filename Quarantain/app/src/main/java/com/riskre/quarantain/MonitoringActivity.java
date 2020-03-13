@@ -1,17 +1,15 @@
 package com.riskre.quarantain;
 
 import android.Manifest;
-import android.accessibilityservice.FingerprintGestureController;
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -24,14 +22,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
-import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.UUID;
 
 public class MonitoringActivity extends AppCompatActivity implements BeaconConsumer {
 
@@ -65,6 +60,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
                     if (this.checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
                             != PackageManager.PERMISSION_GRANTED) {
                         if (!this.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+
                             final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                             builder.setTitle("This app needs background location access");
                             builder.setMessage("Please grant location access so this app can detect beacons in the background.");
@@ -121,7 +117,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
         }
         QuarantainApplication application = ((QuarantainApplication) this.getApplicationContext());
         TextView android_id_view = findViewById(R.id.android_id);
-        android_id_view.setText("Your ID: "+application.getAndroidId());
+        android_id_view.setText("Your ID: " + application.getAndroidId());
     }
 
     private void initRecyclerView() {
@@ -133,7 +129,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+                                           String[] permissions, int[] grantResults) {
         switch (requestCode) {
             case PERMISSION_REQUEST_FINE_LOCATION: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -207,10 +203,8 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
                     Integer time_of_contact = sharedPref.getInt(beacon.getId1().toString(), 1);
 
                     contact_logs.add("Distance: " + beacon.getDistance() + "\n" +
-
                             "Human ID: " + beacon.getId1() + "\n" +
                             "Seconds of Contact: " + time_of_contact.toString() + "\n");
-
                     ed.putInt(beacon.getId1().toString(), time_of_contact.intValue() + 1);
                     ed.commit();
                 }

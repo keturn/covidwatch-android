@@ -32,7 +32,7 @@
         android:id="@+id/android_id"
         android:layout_width="355dp"
         android:layout_height="32dp"
-        android:text="Your ID:"
+        android:text="@string/your_id"
         app:layout_constraintBottom_toTopOf="@+id/recycler_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.589"

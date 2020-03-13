@@ -2,16 +2,10 @@ package com.riskre.quarantain;
 
 import android.app.Application;
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseSettings;
-import android.content.Context;
 import android.content.Intent;
-
-import android.os.Build;
-import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -21,18 +15,18 @@ import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.BeaconTransmitter;
 import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
-import org.altbeacon.beacon.startup.RegionBootstrap;
 import org.altbeacon.beacon.startup.BootstrapNotifier;
+import org.altbeacon.beacon.startup.RegionBootstrap;
 
 import java.util.Arrays;
 
-
 public class QuarantainApplication extends Application implements BootstrapNotifier {
+
     private static final String TAG = "QuarantainApp";
+
     private RegionBootstrap regionBootstrap;
     private BackgroundPowerSaver backgroundPowerSaver;
     private MonitoringActivity monitoringActivity = null;
-    private String cumulativeDetections = "";
     private BeaconManager beaconManager;
     private Region region;
     private Beacon beacon;
@@ -40,7 +34,6 @@ public class QuarantainApplication extends Application implements BootstrapNotif
     private String android_id;
 
     public void onCreate() {
-
         super.onCreate();
 
         beaconManager = BeaconManager.getInstanceForApplication(this);
@@ -50,6 +43,8 @@ public class QuarantainApplication extends Application implements BootstrapNotif
         beaconManager.getBeaconParsers().clear();
         beaconManager.getBeaconParsers().add(new BeaconParser().
                 setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
+
+        // a unique ID that is set when
         android_id = Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
 
@@ -60,18 +55,17 @@ public class QuarantainApplication extends Application implements BootstrapNotif
                 .setId3("2")
                 .setManufacturer(0x004C) // Radius Networks.  Change this for other beacon layouts
                 .setTxPower(-59)
-                .setDataFields(Arrays.asList(new Long[]{0l})) // Remove this for beacon layouts without d: fields
+                .setDataFields(Arrays.asList(0l)) // Remove this for beacon layouts without d: fields
                 .build();
 
-        // TODO some phones can do bluetooth LE scan but not transmit
-        // need to check for that case here at some point
         BeaconParser beaconParser = new BeaconParser()
                 .setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24");
         BeaconTransmitter beaconTransmitter = new BeaconTransmitter(getApplicationContext(), beaconParser);
+
         beaconTransmitter.startAdvertising(beacon, new AdvertiseCallback() {
             @Override
             public void onStartFailure(int errorCode) {
-                // TODO error handling
+                // TODO some phones can do bluetooth LE scan but not transmit, needs handler
                 Log.i(TAG, "Advertisement start failed with code: " + errorCode);
             }
 
@@ -81,7 +75,7 @@ public class QuarantainApplication extends Application implements BootstrapNotif
             }
         });
 
-        beaconManager.setDebug(true);
+        // beaconManager.setDebug(true);
 
         Log.d(TAG, "setting up background monitoring for beacons and power saving");
 
@@ -107,9 +101,7 @@ public class QuarantainApplication extends Application implements BootstrapNotif
         beaconManager.setBackgroundBetweenScanPeriod(0);
         beaconManager.setBackgroundScanPeriod(1100);
 
-        // simply constructing this class and holding a reference to it in your custom Application
-        // class will automatically cause the BeaconLibrary to save battery whenever the application
-        // is not visible.  This reduces bluetooth power usage by about 60%
+        // This reduces bluetooth power usage by about 60% when the app is not visible
         backgroundPowerSaver = new BackgroundPowerSaver(this);
     }
 
@@ -121,7 +113,7 @@ public class QuarantainApplication extends Application implements BootstrapNotif
         }
     }
 
-    public String getAndroidId(){
+    public String getAndroidId() {
         return android_id;
     }
 
@@ -137,16 +129,16 @@ public class QuarantainApplication extends Application implements BootstrapNotif
 
     @Override
     public void didEnterRegion(Region region) {
-        // TODO make contact w/ a beacon
+        // TODO
     }
 
     @Override
     public void didExitRegion(Region region) {
-        // TODO lose contact w/ a beacon
+        // TODO
     }
 
     @Override
     public void didDetermineStateForRegion(int i, Region region) {
-        // TODO ???
+        // TODO
     }
 }
